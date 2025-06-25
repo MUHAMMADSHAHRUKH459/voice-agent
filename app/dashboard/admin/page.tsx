@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
@@ -11,24 +11,23 @@ export default function AdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/auth');
-    } else if (!isLoading && user && user.role !== 'admin') {
-      router.push('/dashboard');
+    // Redirect unauthenticated or non-admin users
+    if (!isLoading && (!user || user.role !== 'admin')) {
+      router.push(user ? '/dashboard' : '/auth');
     }
-  }, [user, isLoading, router]);
+  }, [isLoading, user, router]);
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
   }
 
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
+  // Block unauthorized render
+  if (!user || user.role !== 'admin') return null;
 
   return (
     <DashboardLayout>
