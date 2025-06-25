@@ -11,13 +11,13 @@ export default function AdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect unauthenticated or non-admin users
+    // Redirect if not logged in or not an admin
     if (!isLoading && (!user || user.role !== 'admin')) {
       router.push(user ? '/dashboard' : '/auth');
     }
   }, [isLoading, user, router]);
 
-  // Loading state
+  // Show loading spinner
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -26,7 +26,7 @@ export default function AdminPage() {
     );
   }
 
-  // Block unauthorized render
+  // Prevent render if not admin
   if (!user || user.role !== 'admin') return null;
 
   return (
