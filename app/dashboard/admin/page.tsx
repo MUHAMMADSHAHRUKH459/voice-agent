@@ -2,22 +2,33 @@
 
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
-import { AdminPanel } from '@/components/admin/admin-panel';
+import dynamic from 'next/dynamic';
+
+const AdminPanel = dynamic(
+  () => import('@/components/admin/admin-panel').then(mod => mod.AdminPanel),
+  { 
+    loading: () => <div>Loading admin panel...</div>,
+    ssr: false
+  }
+);
 
 export default function AdminPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
 
   useEffect(() => {
-    // Redirect if not logged in or not an admin
-    if (!isLoading && (!user || user.role !== 'admin')) {
-      router.push(user ? '/dashboard' : '/auth');
+    if (!isLoading) {
+      const authorized = Boolean(user && user.role === 'admin');
+      setIsAuthorized(authorized);
+      if (!authorized) {
+        router.push(user ? '/dashboard' : '/auth');
+      }
     }
   }, [isLoading, user, router]);
 
-  // Show loading spinner
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -26,8 +37,7 @@ export default function AdminPage() {
     );
   }
 
-  // Prevent render if not admin
-  if (!user || user.role !== 'admin') return null;
+  if (!isAuthorized) return null;
 
   return (
     <DashboardLayout>
